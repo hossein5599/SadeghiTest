@@ -1,0 +1,126 @@
+﻿@model IndexViewModel
+
+
+
+<h3>Edit Record</h3>
+<form asp-controller="sadeghi" asp-action="index" id="editForm" method="post">
+    <div>
+        <input type="hidden" id="Serial" name="Serial" />
+    </div>
+    <div>
+        <label for="AccNum">AccNum:</label>
+        <input type="text" id="AccNum" name="AccNum" />
+    </div>
+    <div>
+        <label for="Title">Title:</label>
+        <input type="text" id="Title" name="Title" />
+    </div>
+    <div>
+        <label for="Active">Active:</label>
+        <input type="radio" id="Active1" name="Active" value="1" checked> Active
+        <input type="radio" id="Active0" name="Active" value="0"> Inactive
+    </div>
+    <div>
+        <label for="DLTyperef">DLTyperef:</label>
+        <select id="DLTyperef" name="DLTyperef">
+            @foreach (var option in Model.DLTypeOptions)
+            {
+                <option value="@option.Value">@option.Text</option>
+            }
+        </select>
+    </div>
+    <div>
+        <label for="Dsr">Dsr:</label>
+        <input type="text" id="Dsr" name="Dsr" />
+    </div>
+    <div>
+        <button onclick="saveChanges()">Save</button>
+    </div>
+</form>
+
+<br />
+
+<table id="myTable">
+    <thead>
+        <tr>
+            <th>Serial</th>
+            <th>AccNum</th>
+            <th>Title</th>
+            <th>Active</th>
+            <th>DLTyperef</th>
+            <th>Dsr</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.MyModels!)
+        {
+            <tr ondblclick="editRecord('@item.Serial')">
+                <td>@item.Serial</td>
+                <td>@item.AccNum</td>
+                <td>@item.Title</td>
+                <td>@(item.Active == 1 ? "Active" : "Inactive")</td>
+                <td>@item.DLTyperef</td>
+                <td>@item.Dsr</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<script>
+    function editRecord(serial) {
+        document.getElementById('Serial').value = serial;
+
+        var tableRows = document.querySelectorAll('tbody tr');
+        var selectedRecord;
+        for (var i = 0; i < tableRows.length; i++) {
+            if (tableRows[i].querySelector('td:first-child').textContent === serial) {
+                selectedRecord = tableRows[i];
+                break;
+            }
+        }
+
+        document.getElementById('AccNum').value = selectedRecord.querySelector('td:nth-child(2)').textContent;
+        document.getElementById('Title').value = selectedRecord.querySelector('td:nth-child(3)').textContent;
+        document.getElementById('Dsr').value = selectedRecord.querySelector('td:nth-child(6)').textContent;
+        document.getElementById('DLTyperef').value = selectedRecord.querySelector('td:nth-child(5)').textContent;
+
+        if (selectedRecord.querySelector('td:nth-child(4)').textContent === 'Active') {
+            document.getElementById('Active1').checked = true;
+        } else {
+            document.getElementById('Active0').checked = true;
+        }
+
+    }
+
+    function saveChanges() {
+        var serial = $('#Serial').val();
+        var accNum = $('#AccNum').val();
+        var title = $('#Title').val();
+        var active = $('input[name="Active"]:checked').val();
+        var dlTypeRef = $('#DLTyperef').val();
+        var dsr = $('#Dsr').val();
+
+        var data = {
+            Serial: serial,
+            AccNum: accNum,
+            Title: title,
+            Active: active,
+            DLTyperef: dlTypeRef,
+            Dsr: dsr
+        };
+
+        $.ajax({
+            url: '/Sadeghi/Index',
+            type: 'POST',
+            data: JSON.stringify(data),
+            contentType: 'application/json',
+            success: function (response) {
+            console.log(response);
+            },
+            error: function (xhr) {
+                console.log(xhr.responseText);
+            }
+        });
+    }
+
+</script>
